@@ -47,30 +47,33 @@ async def quiz(ctx):
                 await question.reply(f"<@{ctx.message.author.id}> YOU LOST! The correct answer was: {random_player['displayName']}")
                 cur.executescript(f"""
                             BEGIN;
-                            INSERT OR IGNORE INTO users VALUES (\'{ctx.message.author.name}\', 8, 0);
+                            INSERT OR IGNORE INTO users VALUES (\'{ctx.message.author.name}\', 8, 0, 0, 0);
                             UPDATE users SET plays = plays + 1 WHERE name=\'{ctx.message.author.name}\';
+                            UPDATE users SET maxstreak = MAX(maxstreak, currstreak), currstreak = 0 WHERE name=\'{ctx.message.author.name}\';
                             COMMIT;
                             """)
         else:
                 await answer.reply("YOU WON!")
                 cur.executescript(f"""
                             BEGIN;
-                            INSERT OR IGNORE INTO users VALUES (\'{ctx.message.author.name}\', 8, 0);
+                            INSERT OR IGNORE INTO users VALUES (\'{ctx.message.author.name}\', 8, 0, 0, 0);
                             UPDATE users SET plays = plays + 1, correct = correct + 1 WHERE name=\'{ctx.message.author.name}\';
+                            UPDATE users SET currstreak = currstreak + 1 WHERE name=\'{ctx.message.author.name}\'; 
                             COMMIT;
                             """)
-        
+
 @bot.command()
 async def stats(ctx):
         embed=discord.Embed(title="Rat Leaderboard", color=discord.Color.green())
+        
         if cur.execute("SELECT * FROM users ORDER BY plays / correct, plays LIMIT 10").fetchone():    
                 query = cur.execute("SELECT * FROM users ORDER BY plays / correct, plays")
-                player, plays, correct = zip(*query)
-                accuracy = [f"{a}/{b - 8}" for a, b in zip(correct, plays)]
-                score = [str(round(a/b, 2)) for a, b in zip(correct, plays)]
+                player, plays, correct, currstreak, maxstreak = zip(*query)
+                score = [f"{str(round(a/b, 2))} ({a}/{b - 8})"  for a, b in zip(correct, plays)]
+                maxstreak = [str(max(a, b)) for a, b in zip(currstreak, maxstreak)]
                 embed.add_field(name = 'Player', value= "\n".join(player), inline = True)
-                embed.add_field(name = 'Accuracy', value = "\n".join(accuracy), inline = True)
                 embed.add_field(name = 'Score', value = "\n".join(score), inline = True)
+                embed.add_field(name = 'Streak', value = "\n".join(maxstreak), inline = True)
         await ctx.send(embed=embed)        
         
 bot.run(token, log_handler=handler, log_level=logging.DEBUG) 
