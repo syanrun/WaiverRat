@@ -32,17 +32,17 @@ async def quiz(ctx):
                 response = requests.get(img)
                 if response.status_code != 404:
                         break
-        await ctx.send(img)
+        question = await ctx.reply(img)
         
         def check(m):
                 return fuzz.ratio(m.content.lower(), random_player['displayName'].lower()) >= 80 and m.channel == ctx.message.channel and ctx.message.author == m.author
         
         try:
-                await bot.wait_for("message", check=check, timeout=10)
+                answer = await bot.wait_for("message", check=check, timeout=10)
         except:
-                await ctx.send(f"YOU LOST! The correct answer was: {random_player['displayName']}")
+                await question.reply(f"<@{ctx.message.author.id}> YOU LOST! The correct answer was: {random_player['displayName']}")
         else:
-                await ctx.send("YOU WON!")
+                await answer.reply("YOU WON!")
         
         
         
