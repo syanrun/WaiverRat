@@ -66,8 +66,8 @@ async def quiz(ctx):
 async def stats(ctx):
         embed=discord.Embed(title="Rat Leaderboard", color=discord.Color.green())
         
-        if cur.execute("SELECT * FROM users ORDER BY plays / correct, plays LIMIT 10").fetchone():    
-                query = cur.execute("SELECT * FROM users ORDER BY plays / correct, plays")
+        if cur.execute("SELECT * FROM users").fetchone():    
+                query = cur.execute("SELECT * FROM users ORDER BY correct * 1.0 / plays DESC, plays DESC")
                 player, plays, correct, currstreak, maxstreak = zip(*query)
                 score = [f"{str(round(a/b, 2))} ({a}/{b - 8})"  for a, b in zip(correct, plays)]
                 maxstreak = [str(max(a, b)) for a, b in zip(currstreak, maxstreak)]
