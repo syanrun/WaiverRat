@@ -1,6 +1,6 @@
-cv2
 discord.py
 numpy
+opencv-python
 python-dotenv
 requests
 thefuzz
