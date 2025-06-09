@@ -1,4 +1,6 @@
+cv2
 discord.py
+numpy
 python-dotenv
 requests
 thefuzz
