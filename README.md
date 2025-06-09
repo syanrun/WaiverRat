@@ -3,4 +3,4 @@ Usage:\
 rat.quiz: Random NFL Player\
 rat.face: Random NFL Player (Face Only)\
 rat.stats: quiz leaderboard\
-rat.facestats: face leaderboard\
+rat.facestats: face leaderboard
