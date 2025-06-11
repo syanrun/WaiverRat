@@ -1,4 +1,5 @@
 discord.py
+dlib
 numpy
 opencv-python-headless
 python-dotenv
