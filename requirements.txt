@@ -1,3 +1,4 @@
+cmake
 discord.py
 dlib
 numpy

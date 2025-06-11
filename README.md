@@ -5,4 +5,4 @@ rat.face: Random NFL Player (Face Only)\
 rat.mash: 2 Random NFL Players (Face Morphed)\
 rat.stats: quiz leaderboard\
 rat.facestats: face leaderboard\
-rat.mashsstats: mash leaderboard\
+rat.mashsstats: mash leaderboard
