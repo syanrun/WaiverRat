@@ -27,8 +27,8 @@ conn = sqlite3.connect("userdata.db")
 cur = conn.cursor()
 
 face_detector = cv2.FaceDetectorYN.create("face_detection_yunet_2023mar.onnx", "", (600, 436), 0.9, 0.3, 5000)
-dlib_detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+# dlib_detector = dlib.get_frontal_face_detector()
+# predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 with open('blocklist.json', 'r') as file:
     blocklist_data = json.load(file)
