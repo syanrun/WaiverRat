@@ -1,6 +1,6 @@
 import cv2
 import discord
-import dlib
+#import dlib
 from discord.ext import commands
 from dotenv import load_dotenv
 import io
