@@ -70,7 +70,7 @@ async def hoop(ctx):
                 return
         
         if ctx.message.author.name in blocklist:
-                ctx.reply("YOU ARE A CHEATER!")
+                await ctx.reply("YOU ARE A CHEATER!")
                 return
         
         random_player, _, img = await find_baller()
@@ -107,7 +107,7 @@ async def quiz(ctx):
                 return
         
         if ctx.message.author.name in blocklist:
-                ctx.reply("YOU ARE A CHEATER!")
+                await ctx.reply("YOU ARE A CHEATER!")
                 return
         
         random_player, _, img = await find_player()
@@ -227,7 +227,7 @@ async def mash(ctx):
                 return
         
         if ctx.message.author.name in blocklist:
-                ctx.reply("YOU ARE A CHEATER!")
+                await ctx.reply("YOU ARE A CHEATER!")
                 return
         
         player1, img1, points1 = await get_face()
