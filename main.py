@@ -51,7 +51,56 @@ async def find_player():
                 if response.status_code == 200:
                         break
         return random_player, response, img
+
+async def find_baller():
+        response = requests.get("https://partners.api.espn.com/v2/sports/basketball/nba/athletes?limit=7000")
+        active_players = [athlete for athlete in response.json()['athletes']if athlete['status']['type'] == 'active']
+        img = None
+        while True:
+                random_player = random.choice(active_players)
+                img = f"https://a.espncdn.com/i/headshots/nba/players/full/{random_player['id']}.png"
+                response = requests.get(img)
+                if response.status_code == 200:
+                        break
+        return random_player, response, img
+
+@bot.command()
+async def hoop(ctx):
+        if ctx.message.channel.type == discord.ChannelType.private:
+                return
         
+        if ctx.message.author.name in blocklist:
+                ctx.reply("YOU ARE A CHEATER!")
+                return
+        
+        random_player, _, img = await find_baller()
+        
+        question = await ctx.reply(img)
+        
+        def check(m):
+                return fuzz.ratio(m.content.lower(), random_player['displayName'].lower()) >= 80 and m.channel == ctx.message.channel and ctx.message.author == m.author
+        
+        try:
+                answer = await bot.wait_for("message", check=check, timeout=10)
+        except:
+                await question.reply(f"<@{ctx.message.author.id}> YOU LOST! The correct answer was: {random_player['displayName']}")
+                cur.executescript(f"""
+                            BEGIN;
+                            INSERT OR IGNORE INTO hoopusers VALUES (\'{ctx.message.author.name}\', 8, 0, 0, 0);
+                            UPDATE hoopusers SET plays = plays + 1 WHERE name=\'{ctx.message.author.name}\';
+                            UPDATE hoopusers SET maxstreak = MAX(maxstreak, currstreak), currstreak = 0 WHERE name=\'{ctx.message.author.name}\';
+                            COMMIT;
+                            """)
+        else:
+                await answer.reply("YOU WON!")
+                cur.executescript(f"""
+                            BEGIN;
+                            INSERT OR IGNORE INTO hoopusers VALUES (\'{ctx.message.author.name}\', 8, 0, 0, 0);
+                            UPDATE hoopusers SET plays = plays + 1, correct = correct + 1 WHERE name=\'{ctx.message.author.name}\';
+                            UPDATE hoopusers SET currstreak = currstreak + 1 WHERE name=\'{ctx.message.author.name}\'; 
+                            COMMIT;
+                            """)
+ 
 @bot.command()
 async def quiz(ctx):
         if ctx.message.channel.type == discord.ChannelType.private:
@@ -326,6 +375,11 @@ async def facestats(ctx):
 @bot.command()
 async def mashstats(ctx):
         await ctx.send(embed=await create_leaderboard("Mash Rat Leaderboard", "mashusers"))      
+
+@bot.command()
+async def hoopstats(ctx):
+        await ctx.send(embed=await create_leaderboard("NBA Leaderboard", "hoopusers"))      
+
        
 if env == "dev": 
         bot.run(token, log_handler=handler, log_level=logging.DEBUG) 
