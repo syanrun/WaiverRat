@@ -7,4 +7,4 @@ rat.hoop: Random NBA Player\
 rat.stats: quiz leaderboard\
 rat.facestats: face leaderboard\
 rat.mashstats: face morph leaderboard \
-rat.hoopstats: nba leaderboard\
+rat.hoopstats: nba leaderboard
