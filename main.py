@@ -350,6 +350,57 @@ async def mash(ctx):
                             COMMIT;
                             """)
 
+ 
+@bot.command()
+async def shadow(ctx):
+        if ctx.message.channel.type == discord.ChannelType.private:
+                return
+        
+        if ctx.message.author.name in blocklist:
+                await ctx.reply("YOU ARE A CHEATER!")
+                return
+        
+        while True:
+                random_player, response, original_img = await find_player()
+                img = cv2.imdecode(np.asarray(bytearray(response.content), dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+                if img is None: 
+                        continue
+                if img.shape[2] != 4:
+                        continue
+                alpha_channel = img[:, :, 3]
+                silhouette_bgr = np.zeros_like(img[:, :, :3], dtype=np.uint8) 
+                silhouette_bgr[alpha_channel > 0] = [0, 0, 0] 
+                final_silhouette = cv2.merge([silhouette_bgr[:, :, 0:3], alpha_channel])
+                break
+        
+        _, encoded_image = cv2.imencode(".png", final_silhouette)
+        image_file = io.BytesIO(encoded_image.tobytes())
+        discord_file = discord.File(image_file, filename="image.png")
+        question = await ctx.reply(file=discord_file)
+        
+        def check(m):
+                return fuzz.ratio(m.content.lower(), random_player['displayName'].lower()) >= 80 and m.channel == ctx.message.channel and ctx.message.author == m.author
+        
+        try:
+                answer = await bot.wait_for("message", check=check, timeout=10)
+        except:
+                await question.reply(f"<@{ctx.message.author.id}> YOU LOST! The correct answer was: [{random_player['displayName']}]({original_img})")
+                cur.executescript(f"""
+                            BEGIN;
+                            INSERT OR IGNORE INTO shadowusers VALUES (\'{ctx.message.author.name}\', 8, 0, 0, 0);
+                            UPDATE shadowusers SET plays = plays + 1 WHERE name=\'{ctx.message.author.name}\';
+                            UPDATE shadowusers SET maxstreak = MAX(maxstreak, currstreak), currstreak = 0 WHERE name=\'{ctx.message.author.name}\';
+                            COMMIT;
+                            """)
+        else:
+                await answer.reply("YOU WON!")
+                cur.executescript(f"""
+                            BEGIN;
+                            INSERT OR IGNORE INTO shadowusers VALUES (\'{ctx.message.author.name}\', 8, 0, 0, 0);
+                            UPDATE shadowusers SET plays = plays + 1, correct = correct + 1 WHERE name=\'{ctx.message.author.name}\';
+                            UPDATE shadowusers SET currstreak = currstreak + 1 WHERE name=\'{ctx.message.author.name}\'; 
+                            COMMIT;
+                            """)
 
 async def create_leaderboard(title, db):
         embed=discord.Embed(title=title, color=discord.Color.green())
@@ -378,7 +429,11 @@ async def mashstats(ctx):
 
 @bot.command()
 async def hoopstats(ctx):
-        await ctx.send(embed=await create_leaderboard("NBA Leaderboard", "hoopusers"))      
+        await ctx.send(embed=await create_leaderboard("NBA Leaderboard", "hoopusers"))    
+
+@bot.command()
+async def shadowstats(ctx):
+        await ctx.send(embed=await create_leaderboard("NFL Silhouette Leaderboard", "shadowusers"))    
 
        
 if env == "dev": 
