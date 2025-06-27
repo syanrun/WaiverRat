@@ -368,9 +368,8 @@ async def shadow(ctx):
                 if img.shape[2] != 4:
                         continue
                 alpha_channel = img[:, :, 3]
-                silhouette_bgr = np.zeros_like(img[:, :, :3], dtype=np.uint8) 
-                silhouette_bgr[alpha_channel > 0] = [0, 0, 0] 
-                final_silhouette = cv2.merge([silhouette_bgr[:, :, 0:3], alpha_channel])
+                final_silhouette = np.full(img.shape[:2] + (3,), (255, 255, 255), dtype=np.uint8) 
+                final_silhouette[alpha_channel > 0] = [0, 0, 0]
                 break
         
         _, encoded_image = cv2.imencode(".png", final_silhouette)
